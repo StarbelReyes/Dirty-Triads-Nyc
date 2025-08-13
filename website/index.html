@@ -13,7 +13,7 @@
     <img class="splash-bg" src="assets/ChatGPT Image Aug 10, 2025, 08_43_58 AM.png" alt="" aria-hidden="true" />
     <div class="gate__overlay"></div>
     <div class="gate__content">
-      <button id="enterBtn" class="gate__logo" aria-label="Enter site">
+      <button id="enterBtn" class="gate__logo" type="button" aria-label="Enter site">
         <img src="assets/ChatGPT Image Aug 10, 2025, 09_10_07 AM.png" alt="Dirty Triad NYC logo" />
       </button>
       <div id="gateTitle" class="gate__hint"></div>
@@ -21,30 +21,35 @@
   </div>
 
   <!-- ===== NAVBAR ===== -->
-<!-- ===== NAVBAR ===== -->
-<header class="navbar" role="banner">
-  <div class="nav-inner">
-    <a class="brand" href="#" aria-label="Dirty Triad NYC home">
-      <img src="assets/ChatGPT Image Aug 10, 2025, 09_10_07 AM.png" alt="Dirty Triad NYC" />
-    </a>
+  <header class="navbar" role="banner">
+    <div class="nav-inner">
+      <a class="brand" href="#" aria-label="Dirty Triad NYC home">
+        <img src="assets/ChatGPT Image Aug 10, 2025, 09_10_07 AM.png" alt="Dirty Triad NYC" />
+      </a>
 
-    <nav id="primary-nav" class="nav-links" aria-label="Primary">
-      <a href="#shop">Shop</a>
-      <a href="#about">About</a>
-    </nav>
+      <nav id="primary-nav" class="nav-links" aria-label="Primary">
+        <a href="#shop">Shop</a>
+        <a href="#about">About</a>
+      </nav>
 
-    <button id="hamburger"
-            class="hamburger"
-            aria-label="Open menu"
-            aria-expanded="false"
-            aria-controls="primary-nav">
-      ☰
-    </button>
-  </div>
+      <!-- 🛒 Cart button -->
+      <button id="cartButton" class="dtc-cart-button" type="button" aria-label="Open cart">
+        🛒 <span id="cartCount" class="dtc-cart-count">0</span>
+      </button>
 
-  <!-- mobile backdrop -->
-  <div class="nav-dim" hidden></div>
-</header>
+      <button id="hamburger"
+              class="hamburger"
+              type="button"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-controls="primary-nav">
+        ☰
+      </button>
+    </div>
+
+    <!-- mobile backdrop (one instance only) -->
+    <div class="nav-dim" hidden></div>
+  </header>
 
   <!-- ===== HERO ===== -->
   <section class="hero container">
@@ -59,23 +64,12 @@
       </div>
       <div class="feature" aria-label="Shipping and returns">
         <h3>Perks</h3>
-        <p>Free shipping over $75 · Easy 30‑day returns · Carbon‑neutral delivery</p>
+        <p>Free shipping over $75 · Easy 30-day returns · Carbon-neutral delivery</p>
       </div>
     </div>
   </section>
 
-  
-
-  <!-- ===== CATEGORIES =====
-  <section class="categories container" id="men">
-    <div class="cat-grid">
-      <a class="cat" href="#shop"><span>T-Shirts</span></a>
-      <a class="cat" href="#shop"><span>Hoodies</span></a>
-      <a class="cat" href="#shop"><span>Hats</span></a>
-    </div>
-  </section>
-
-  ===== PRODUCTS ===== -->
+  <!-- ===== PRODUCTS ===== -->
   <section class="section container" id="shop">
     <h2>Latest Collection</h2>
     <div class="grid">
@@ -87,22 +81,25 @@
           <button class="btn" type="button">Add to cart</button>
         </div>
       </article>
+
       <article class="card" aria-label="Heavyweight Hoodie">
-        <div class="thumb"><img src="assets/kill bikk.png" alt="DT Essentials Tee" /></div>
+        <div class="thumb"><img src="assets/kill bikk.png" alt="Heavyweight Hoodie" /></div>
         <div class="card-body">
           <div class="title">Heavyweight Hoodie</div>
           <div class="price">$78</div>
           <button class="btn" type="button">Add to cart</button>
         </div>
       </article>
+
       <article class="card" aria-label="Tapered Joggers">
-        <div class="thumb"><img src="assets/freddy.png" alt="DT Essentials Tee" /></div>
+        <div class="thumb"><img src="assets/freddy.png" alt="Tapered Joggers" /></div>
         <div class="card-body">
           <div class="title">Tapered Joggers</div>
           <div class="price">$64</div>
           <button class="btn" type="button">Add to cart</button>
         </div>
       </article>
+
       <article class="card" aria-label="Classic Cap">
         <div class="thumb"><span>640×800</span></div>
         <div class="card-body">
@@ -131,13 +128,37 @@
     <div class="footer-inner">
       <small>© <span id="year"></span> Dirty Triad NYC. All rights reserved.</small>
       <div style="display:flex;gap:10px;align-items:center">
-        <a href="#">Privacy</a><span aria-hidden>·</span>
-        <a href="#">Terms</a><span aria-hidden>·</span>
+        <a href="#">Privacy</a><span aria-hidden="true">·</span>
+        <a href="#">Terms</a><span aria-hidden="true">·</span>
         <a href="#">Contact</a>
       </div>
     </div>
   </footer>
 
+  <!-- 🛒 Cart Drawer -->
+  <div id="dtc-cart" aria-hidden="true">
+    <div class="dtc-panel" role="dialog" aria-modal="true" aria-labelledby="dtcCartTitle">
+      <header class="dtc-header">
+        <h2 id="dtcCartTitle">Your Cart</h2>
+        <button class="dtc-close" type="button" aria-label="Close cart">×</button>
+      </header>
+      <ul class="dtc-items" id="dtcItems"></ul>
+      <div class="dtc-footer">
+        <div class="dtc-row">
+          <span>Subtotal</span><strong id="dtcSubtotal">$0.00</strong>
+        </div>
+        <button id="dtcCheckout" class="dtc-primary" type="button">Checkout</button>
+      </div>
+    </div>
+    <!-- optional: if you want a cart backdrop, style .dtc-backdrop in CSS -->
+    <div class="dtc-backdrop" hidden></div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="dtc_cart.js"></script>
+  <script>
+    // keep the year fresh
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
