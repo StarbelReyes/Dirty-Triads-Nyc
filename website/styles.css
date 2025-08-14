@@ -57,6 +57,7 @@ button{font:inherit;color:inherit}
 .nav-links a{color:var(--muted);font-weight:600;padding:8px 10px;border-radius:10px;transition:all .2s ease}
 .nav-links a:hover{color:var(--ink);background:#e8b709}
 .hamburger{display:none;background:transparent;border:0;color:var(--ink);padding:8px;cursor:pointer}
+.nav-links a.is-active{ color: var(--ink); background:#2a2c32; }
 
 /* Backdrop for mobile menu (hidden by default) */
 .nav-dim{
@@ -76,7 +77,7 @@ button{font:inherit;color:inherit}
 .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#131419;border:1px solid #2a2c32;color:var(--muted);font-size:.85rem}
 .hero h1{font-size:clamp(28px,4.2vw,48px);line-height:1.05;margin:0}
 .hero p{color:var(--muted);margin:0;font-size:1.05rem}
-.cta{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:12px 16px;background:var(--brand);color:var(--brand-ink);font-weight:800;border:0;cursor:pointer;box-shadow:var(--shadow)}
+.cta{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:12px 16px;background:#2f2e2e77;color:#dfb220;font-weight:800;border:0;cursor:pointer;box-shadow:var(--shadow)}
 .feature{background:linear-gradient(180deg,#131419,#0f1013);border:1px solid #202228;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;display:grid;gap:12px}
 
 /* ===== CATEGORIES ===== */
@@ -207,3 +208,13 @@ footer{border-top:1px solid #1f2024;color:var(--muted)}
   #dtc-cart .dtc-inp{ width: 46px; }
   #dtc-cart .dtc-primary{ width:100%; }
 }
+
+ /* scoped to this section only */
+ #about .gold{ color:#ddbb13; }            /* dark yellow accent */
+ #about .chip{ display:inline-block; padding:6px 10px; border-radius:999px;
+               background:#131419; border:1px solid #2a2c32; color:#9aa0a6; font-weight:700; }
+ #about .lead{ font-size:1.15rem; color:#cfd3db; }
+ #about .pill{ display:inline-block; padding:6px 10px; border-radius:999px;
+               background:linear-gradient(180deg,#191a20,#141519); border:1px solid #26282e; }
+ #about .grid-2{ display:grid; grid-template-columns:1.2fr 1fr; gap:18px; }
+ @media (max-width: 960px){ #about .grid-2{ grid-template-columns:1fr; } }

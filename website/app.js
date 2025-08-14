@@ -78,3 +78,29 @@
         }
       })();
     });
+
+    // Smooth-scroll (optional; native CSS scroll-behavior works too)
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+});
+
+// Active link on scroll
+const sections = [...document.querySelectorAll('section[id]')]; // e.g., #shop, #about
+const navLinks = [...document.querySelectorAll('.nav-links a')];
+const byId = id => navLinks.find(a => (a.getAttribute('href')||'').replace('#','')===id);
+
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navLinks.forEach(a=>a.classList.remove('is-active'));
+      const link = byId(entry.target.id);
+      if(link) link.classList.add('is-active');
+    }
+  });
+},{ rootMargin: "-40% 0px -55% 0px", threshold: 0.01 });
+
+sections.forEach(s=>io.observe(s));

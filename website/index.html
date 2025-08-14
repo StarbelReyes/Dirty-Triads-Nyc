@@ -46,8 +46,6 @@
         ☰
       </button>
     </div>
-
-    <!-- mobile backdrop (one instance only) -->
     <div class="nav-dim" hidden></div>
   </header>
 
@@ -58,9 +56,7 @@
         <img class="splash-bg-hero" src="assets/ChatGPT Image Aug 10, 2025, 08_43_58 AM.png" alt="" aria-hidden="true" />
         <h1>Clean silhouettes. Bold energy.</h1>
         <p>Street-ready essentials with premium fabrics and a minimal NYC vibe. Built for every day, designed to stand out.</p>
-        <div>
-          <a class="cta" href="#shop">Shop the drop</a>
-        </div>
+        <div><a class="cta" href="#shop">Shop the drop</a></div>
       </div>
       <div class="feature" aria-label="Shipping and returns">
         <h3>Perks</h3>
@@ -72,9 +68,12 @@
   <!-- ===== PRODUCTS ===== -->
   <section class="section container" id="shop">
     <h2>Latest Collection</h2>
-    <div class="grid">
+    <!-- give the grid an id so we can inject Admin products here -->
+    <div class="grid" id="shopGrid">
       <article class="card" aria-label="DT Essentials Tee">
-        <div class="thumb"><img src="assets/1DAF381A-E2A6-4217-848B-F932441B4C66-removebg-preview.jpg" alt="DT Essentials Tee" /></div>
+        <div class="thumb">
+          <img src="assets/1DAF381A-E2A6-4217-848B-F932441B4C66-removebg-preview.jpg" alt="DT Essentials Tee" />
+        </div>
         <div class="card-body">
           <div class="title">DT Essentials Tee</div>
           <div class="price">$34</div>
@@ -112,14 +111,49 @@
   </section>
 
   <!-- ===== ABOUT / NEWSLETTER ===== -->
-  <section class="about container" id="about">
+  <section id="about" class="about container" aria-labelledby="aboutTitle">
     <div class="panel">
-      <h2>About Dirty Triad NYC</h2>
-      <p>Born in Brooklyn. Built for the city. Our drops blend premium materials with a minimal NYC aesthetic — made to move, meant to last.</p>
-      <form class="newsletter" onsubmit="event.preventDefault(); alert('Thanks for subscribing!');">
-        <input class="input" type="email" placeholder="Email for early access" required />
-        <button class="subscribe" type="submit">Subscribe</button>
-      </form>
+      <div class="grid-2">
+        <div>
+          <span class="chip" aria-hidden="true">ABOUT</span>
+          <h2 id="aboutTitle" style="margin:10px 0 8px; font-size:clamp(26px,3.4vw,36px); line-height:1.1;">
+            <span class="gold">Born in Brooklyn.</span> Built for the city.
+          </h2>
+          <p class="lead">
+            Dirty Triad NYC is where streetwear meets precision. We craft everyday essentials with
+            <span class="gold">premium fabrics</span>, sharp silhouettes, and a fearless NYC attitude.
+          </p>
+          <p>
+            Every drop is designed to stand out without trying too hard—built for
+            <span class="gold">comfort</span>, <span class="gold">durability</span>, and
+            <span class="gold">style that lasts</span>. We keep our runs tight, our quality high, and our designs timeless.
+          </p>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+            <a class="cta" href="#shop">Shop the drop</a>
+            <span class="pill">Small-batch · Quality-first</span>
+          </div>
+        </div>
+
+        <div class="feature" aria-label="Brand highlights">
+          <h3 style="margin:0 0 6px;">What sets us apart</h3>
+          <ul style="margin:0; padding-left:18px; line-height:1.7;">
+            <li><span class="gold">Premium materials</span> and clean construction</li>
+            <li><span class="gold">Responsible production</span> and small-batch drops</li>
+            <li>Timeless silhouettes with a <span class="gold">Brooklyn edge</span></li>
+            <li><span class="gold">Customer-first</span> service & easy 30-day returns</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <h3 style="margin:0 0 8px;">Stay in the loop</h3>
+        <p style="margin:0 0 10px; color:#9aa0a6;">Be first to know about drops, restocks, and exclusives.</p>
+        <form class="newsletter" onsubmit="event.preventDefault(); alert('Thanks for subscribing!');">
+          <input class="input" type="email" placeholder="Email for early access" required />
+          <button class="subscribe" type="submit">Subscribe</button>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -150,15 +184,57 @@
         <button id="dtcCheckout" class="dtc-primary" type="button">Checkout</button>
       </div>
     </div>
-    <!-- optional: if you want a cart backdrop, style .dtc-backdrop in CSS -->
     <div class="dtc-backdrop" hidden></div>
   </div>
 
+  <!-- Your scripts -->
   <script src="app.js"></script>
   <script src="dtc_cart.js"></script>
+
+  <!-- Inject Admin products INTO Latest Collection -->
   <script>
-    // keep the year fresh
-    document.getElementById('year').textContent = new Date().getFullYear();
+    window.addEventListener('DOMContentLoaded', function () {
+      const PRODUCTS_KEY = 'dtc_products_v1';
+      const grid = document.getElementById('shopGrid');
+      if (!grid) return;
+
+      // load active products saved from Admin
+      const admin = (JSON.parse(localStorage.getItem(PRODUCTS_KEY) || '[]'))
+        .filter(p => p && p.active);
+
+      // avoid dupes vs your hard-coded cards
+      const existing = new Set(
+        [...grid.querySelectorAll('.card')].map(c =>
+          c.getAttribute('data-id') ||
+          (c.querySelector('.title')?.textContent.trim().toLowerCase() || '')
+        )
+      );
+
+      const toAdd = admin.filter(p =>
+        !existing.has(p.id) && !existing.has((p.name || '').toLowerCase())
+      );
+
+      if (toAdd.length) {
+        const html = toAdd.map(p => `
+          <article class="card" aria-label="${p.name}" data-id="${p.id}">
+            <div class="thumb">
+              <img src="${p.image || p.imageUrl || ''}" alt="${p.name}">
+            </div>
+            <div class="card-body">
+              <div class="title">${p.name}</div>
+              <div class="price">$${Number(p.price || 0).toFixed(2)}</div>
+              <button class="btn" type="button">Add to cart</button>
+            </div>
+          </article>
+        `).join('');
+
+        // put admin items at the TOP of Latest Collection
+        grid.insertAdjacentHTML('afterbegin', html);
+      }
+
+      // footer year
+      document.getElementById('year').textContent = new Date().getFullYear();
+    });
   </script>
 </body>
 </html>

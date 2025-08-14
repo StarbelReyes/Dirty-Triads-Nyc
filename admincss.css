@@ -1,0 +1,149 @@
+/* =========================
+   UPGRADE PACK — Dirty Triad
+   Paste below your existing CSS
+   ========================= */
+
+/* ——— 1) Tokens+ (spacing, motion, z) ——— */
+:root{
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px;
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --ease-out: cubic-bezier(.05,.9,.1,1);
+    --dur-1: 160ms; --dur-2: 260ms; --dur-3: 420ms;
+    --blur-1: 8px; --blur-2: 14px;
+  
+    /* subtle brand glows */
+    --glow: 0 0 0 0 rgba(230,255,77,.0);
+    --glow-hover: 0 10px 30px rgba(230,255,77,.15);
+    --ring-strong: 0 0 0 6px rgba(230,255,77,.08);
+  }
+  
+  /* ——— 2) Typography polish ——— */
+  body{
+    font-feature-settings: "liga" 1, "calt" 1, "ss01" 1;
+    letter-spacing: .15px;
+  }
+  h1,h2,h3{ font-weight: 900; letter-spacing: .2px; }
+  .section h2{
+    position:relative; padding-bottom: 10px;
+  }
+  .section h2::after{
+    content:""; position:absolute; left:0; bottom:0; height:2px; width:64px;
+    background: linear-gradient(90deg, var(--brand), transparent);
+    border-radius: 2px;
+    opacity:.8;
+  }
+  
+  /* ——— 3) Buttons: premium cta + states ——— */
+  .cta{
+    background: linear-gradient(180deg,#2a2b2e,#1b1c1f);
+    color:#e9cf55;
+    border:1px solid #2f2f33;
+    text-transform: uppercase;
+    letter-spacing:.6px;
+    transition: transform var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+  }
+  .cta:hover{ transform: translateY(-1px); box-shadow: var(--glow-hover); border-color:#3a3b41; }
+  .cta:active{ transform: translateY(0); box-shadow: var(--glow); }
+  .btn{
+    transition: transform var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+  }
+  .btn:hover{ border-color:#30323a; transform: translateY(-1px); }
+  .btn:active{ transform: translateY(0); }
+  
+  /* subtle focus ring on interactive */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline: 0;
+    box-shadow: var(--ring-strong);
+    border-color: #2e3036;
+  }
+  
+  /* ——— 4) Navbar sheet animation (mobile) ——— */
+  @media (max-width:960px){
+    .nav-dim{ transition: opacity var(--dur-2) var(--ease); opacity:0; }
+    .navbar.is-open .nav-dim{ opacity:1; }
+  
+    .navbar .nav-links{
+      transform: translateY(-6px) scale(.98);
+      opacity: 0;
+      transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out);
+    }
+    .navbar.is-open .nav-links{
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+  
+  /* ——— 5) Product cards: glow edge + image polish ——— */
+  .card{
+    position:relative; overflow:hidden;
+    transition: transform var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
+  }
+  .card::before{
+    /* faint top edge light */
+    content:""; position:absolute; inset:0 0 auto 0; height:1px;
+    background: linear-gradient(90deg, transparent, rgba(230,255,77,.22), transparent);
+    opacity:.0; transition: opacity var(--dur-2) var(--ease);
+  }
+  .card:hover::before{ opacity:.9; }
+  .thumb{
+    position:relative;
+    background: linear-gradient(120deg,#23252a,#141519);
+  }
+  .thumb img{
+    width:100%; height:100%; object-fit:contain; /* keeps transparent PNGs clean */
+    filter: drop-shadow(0 6px 20px rgba(0,0,0,.45));
+    transform: translateZ(0);
+  }
+  .card:hover{ transform: translateY(-4px); }
+  
+  /* price/title alignment */
+  .card-body .title{ font-weight:800; }
+  .card-body .price{ color:#c9ced8; }
+  
+  /* ——— 6) Hero: upgrade backdrop & headline accent ——— */
+  .hero-card{
+    background:
+      radial-gradient(120% 80% at 20% 0%, rgba(230,255,77,.06), transparent 60%),
+      linear-gradient(180deg,#1b1c22,#101114);
+  }
+  .hero h1 span.highlight{
+    color:#e9cf55;
+    text-shadow: 0 2px 20px rgba(233,207,85,.12);
+  }
+  
+  /* ——— 7) About accents: gold pills + callout ——— */
+  #about .pill{
+    color:#e9cf55;
+    box-shadow: inset 0 0 0 1px #2b2d33, 0 10px 20px rgba(0,0,0,.25);
+  }
+  #about .lead{
+    line-height:1.6;
+  }
+  #about .feature{
+    background:linear-gradient(180deg,#171822,#101114);
+    border-color:#23252c;
+  }
+  
+  /* ——— 8) Smooth scrolling (native) ——— */
+  html{ scroll-behavior: smooth; }
+  
+  /* ——— 9) Custom scrollbar (WebKit) ——— */
+  *::-webkit-scrollbar{ height:12px; width:12px; }
+  *::-webkit-scrollbar-thumb{
+    background: #24262b; border-radius: 999px; border: 3px solid transparent; background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover{ background:#2d2f36; }
+  
+  /* ——— 10) Utilities ——— */
+  .visually-hidden{
+    position:absolute!important; height:1px;width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px);
+    white-space:nowrap; border:0; padding:0; margin:-1px;
+  }
+  .max-w{ max-width: 1200px; margin-inline:auto; }
+  .stack > * + *{ margin-top: var(--space-4); }
+  .cluster{ display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:center; }
+  
+  /* ——— 11) Motion respect ——— */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation: none !important; transition: none !important; }
+  }

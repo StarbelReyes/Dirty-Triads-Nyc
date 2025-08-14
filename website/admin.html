@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dirty Triad NYC — Admin (Orders + Products)</title>
+<style>
+:root{
+  --bg:#0f0f10; --panel:#16171a; --ink:#f2f3f5; --muted:#9aa0a6; --brand:#e6ff4d; --brand-ink:#0f1205;
+  --ring:rgba(230,255,77,.35); --radius:16px; --shadow:0 14px 44px rgba(0,0,0,.35);
+  --ok:#3ddc84; --warn:#f7b500; --bad:#ff5c5c; --chip:#26282c;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:linear-gradient(180deg,var(--bg),#0c0c0d);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.app{max-width:1240px;margin-inline:auto;padding:24px;display:grid;gap:20px}
+.header{position:sticky;top:0;z-index:30;backdrop-filter:saturate(1.2) blur(6px);background:color-mix(in oklab,var(--bg) 82%,black);padding:14px 20px;border-radius:14px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.3px}
+.brand img{width:28px;height:28px;border-radius:6px}
+.badge{background:var(--chip);padding:4px 10px;border-radius:999px;color:var(--muted);font-weight:700}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{appearance:none;border:1px solid #2a2d33;background:#1b1e23;color:var(--ink);padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--brand);color:var(--brand-ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;background:#23252a;color:var(--ink);cursor:pointer;transition:transform .05s ease, background .2s}
+.btn:hover{background:#2a2d33}
+.btn:active{transform:translateY(1px)}
+.btn--brand{background:var(--brand);color:var(--brand-ink)}
+.btn--ghost{background:transparent;border:1px solid #2a2d33}
+.btn--danger{background:var(--bad)}
+.btn--ok{background:var(--ok);color:#0a0b0a}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
+@media (max-width: 980px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid #22252a;border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.panel h2{margin:0 0 12px;font-size:16px}
+.panel .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+.form{display:grid;gap:12px}
+.field{display:grid;gap:6px}
+label{font-weight:700}
+input,select,textarea{width:100%;background:#1d1f24;color:var(--ink);border:1px solid #2a2d33;border-radius:12px;padding:10px 12px;outline:none}
+textarea{min-height:92px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--ring)}
+.row{display:flex;gap:12px}
+.row .field{flex:1}
+.table-wrap{overflow:auto}
+.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.table thead th{font-size:12px;color:var(--muted);text-align:left;font-weight:800;padding:0 12px}
+.table tbody tr{background:#17191d;border:1px solid #24272d}
+.table tbody td{padding:12px;vertical-align:top}
+.table tbody tr:hover{outline:1px solid #2f333a}
+.small{font-size:12px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#212329;color:#cbd1d8;font-weight:700}
+.chip--active{background:#1f2b21;color:#a6f3c0}
+.chip--hidden{background:#311e22;color:#ffb7c1}
+.thumb{width:52px;height:52px;border-radius:10px;overflow:hidden;background:#0f0f10;border:1px solid #2a2d33;display:grid;place-items:center}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.toast{position:fixed;right:20px;bottom:20px;background:#1c2026;border:1px solid #2a2d33;padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:all .2s}
+.toast.show{opacity:1;transform:none}
+.sr-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px)}
+kbd{background:#262a30;border:1px solid #2a2d33;border-radius:6px;padding:1px 6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.badge-num{background:#23252a;border:1px solid #2a2d33;border-radius:999px;padding:2px 8px}
+hr{border:0;border-top:1px solid #24272d;margin:8px 0}
+.switch{display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="brand">
+      <img src="assets/ChatGPT Image Aug 10, 2025, 09_10_07 AM.png" alt="" />
+      <div>Dirty Triad NYC • <span class="badge">Admin</span></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tabOrders" aria-selected="true" aria-controls="panelOrders">Orders</button>
+      <button class="tab" role="tab" id="tabProducts" aria-selected="false" aria-controls="panelProducts">Products</button>
+    </div>
+    <div class="actions">
+      <a class="btn" href="./index.html" title="Go to shop">Shop</a>
+    </div>
+  </div>
+
+  <!-- ORDERS PANEL (reuses your previous order manager) -->
+  <section id="panelOrders" role="tabpanel" aria-labelledby="tabOrders">
+    <div class="grid">
+      <section class="panel" aria-labelledby="formOrderTitle">
+        <h2 id="formOrderTitle">Add / Edit Order</h2>
+        <p class="sub">Manage customer orders. Import/Export for backups. Keyboard: <kbd>N</kbd> new, <kbd>/</kbd> search, <kbd>⌘/Ctrl</kbd>+<kbd>S</kbd> save.</p>
+        <form id="orderForm" class="form" autocomplete="on">
+          <input type="hidden" id="orderId" />
+          <div class="field"><label for="customerName">Customer name</label><input id="customerName" name="name" autocomplete="name" required /></div>
+          <div class="row">
+            <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" required /></div>
+            <div class="field"><label for="total">Total ($)</label><input id="total" type="number" min="0" step="0.01" inputmode="decimal" /></div>
+          </div>
+          <div class="field"><label for="items">Items (one per line or JSON)</label><textarea id="items" placeholder="DT Essentials Tee x1&#10;Classic Cap x2"></textarea></div>
+          <div class="row">
+            <div class="field"><label for="status">Status</label><select id="status"><option value="pending">Pending</option><option value="paid">Paid</option><option value="shipped">Shipped</option><option value="cancelled">Cancelled</option></select></div>
+            <div class="field"><label for="date">Order date</label><input id="date" type="date" /></div>
+          </div>
+          <div class="row">
+            <button class="btn btn--brand" type="submit">Save order</button>
+            <button class="btn btn--ghost" type="reset" id="resetOrderBtn">Reset</button>
+            <button class="btn btn--danger" type="button" id="deleteOrderBtn">Delete</button>
+          </div>
+          <div class="small">Need sample data? <button class="btn btn--ghost" type="button" id="seedOrdersBtn">Seed demo</button> • Import/Export below.</div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <input id="orderSearch" placeholder="Search orders (/, Enter)" />
+          <select id="orderFilter">
+            <option value="all">All statuses</option><option value="pending">Pending</option><option value="paid">Paid</option><option value="shipped">Shipped</option><option value="cancelled">Cancelled</option>
+          </select>
+          <select id="orderSort">
+            <option value="date_desc">Newest first</option><option value="date_asc">Oldest first</option><option value="total_desc">Total ↑</option><option value="total_asc">Total ↓</option><option value="name_asc">Customer A–Z</option>
+          </select>
+          <span class="small" id="orderSummary"></span>
+          <span style="flex:1"></span>
+          <label class="btn btn--ghost" for="importOrdersFile">Import JSON</label>
+          <input id="importOrdersFile" type="file" accept="application/json" hidden />
+          <button class="btn" id="exportOrdersBtn">Export JSON</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table" aria-describedby="orderSummary"><thead><tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="ordersTbody"></tbody></table>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- PRODUCTS PANEL -->
+  <section id="panelProducts" role="tabpanel" aria-labelledby="tabProducts" hidden>
+    <div class="grid">
+      <section class="panel" aria-labelledby="formProductTitle">
+        <h2 id="formProductTitle">Add / Edit Product</h2>
+        <p class="sub">Manage your catalog. Toggle Active to show/hide on the shop.</p>
+        <form id="productForm" class="form" autocomplete="off">
+          <input type="hidden" id="prodId" />
+          <div class="field"><label for="prodName">Name</label><input id="prodName" required /></div>
+          <div class="row">
+            <div class="field"><label for="prodPrice">Price ($)</label><input id="prodPrice" type="number" min="0" step="0.01" inputmode="decimal" /></div>
+            <div class="field"><label for="prodStock">Inventory</label><input id="prodStock" type="number" min="0" step="1" inputmode="numeric" /></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="prodCategory">Category</label><input id="prodCategory" placeholder="Tees / Hoodies / Caps" /></div>
+            <div class="field"><label class="switch"><input id="prodActive" type="checkbox" checked /> Active</label></div>
+          </div>
+          <div class="field"><label for="prodDesc">Description</label><textarea id="prodDesc" placeholder="Short product description"></textarea></div>
+          <div class="field">
+            <label>Image</label>
+            <div class="row">
+              <div class="field"><input id="prodImageUrl" placeholder="Image URL (optional if you upload)" /></div>
+              <div class="field"><input id="prodImageFile" type="file" accept="image/*" /></div>
+            </div>
+            <div class="row" style="align-items:center;gap:12px">
+              <div class="thumb"><img id="prodPreview" alt="preview" /></div>
+              <span class="small">If both URL and file are provided, file wins. Images are stored as base64 in localStorage for now.</span>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn btn--brand" type="submit">Save product</button>
+            <button class="btn btn--ghost" type="reset" id="resetProdBtn">Reset</button>
+            <button class="btn btn--danger" type="button" id="deleteProdBtn">Delete</button>
+          </div>
+          <div class="small">Tips: <kbd>N</kbd> new, <kbd>/</kbd> search. Import/Export below. Active products can be shown on the storefront.</div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <input id="prodSearch" placeholder="Search products (/, Enter)" />
+          <select id="prodFilterActive">
+            <option value="all">All</option>
+            <option value="active">Active only</option>
+            <option value="hidden">Hidden only</option>
+          </select>
+          <select id="prodFilterCat"><option value="all">All categories</option></select>
+          <select id="prodSort">
+            <option value="date_desc">Newest</option>
+            <option value="date_asc">Oldest</option>
+            <option value="price_desc">Price ↑</option>
+            <option value="price_asc">Price ↓</option>
+            <option value="name_asc">Name A–Z</option>
+          </select>
+          <span class="small" id="prodSummary"></span>
+          <span style="flex:1"></span>
+          <button class="btn btn--ghost" id="seedProductsBtn" type="button">Seed demo</button>
+          <label class="btn btn--ghost" for="importProductsFile">Import JSON</label>
+          <input id="importProductsFile" type="file" accept="application/json" hidden />
+          <button class="btn" id="exportProductsBtn">Export JSON</button>
+        </div>
+        <div class="table-wrap">
+          <table class="table" aria-describedby="prodSummary">
+            <thead><tr><th></th><th>Name</th><th>Price</th><th>Inventory</th><th>Status</th><th>Category</th><th>Updated</th><th></th></tr></thead>
+            <tbody id="productsTbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="sr-live" aria-live="polite" id="live"></div>
+
+<script>
+// ---------- tiny stores ----------
+const ORDERS_KEY = 'dtc_orders_v1';
+const PRODUCTS_KEY = 'dtc_products_v1';
+const el = id=>document.getElementById(id);
+const $ = sel=>document.querySelector(sel);
+const $$ = sel=>Array.from(document.querySelectorAll(sel));
+const toast = msg=>{const t=el('toast');t.textContent=msg;t.classList.add('show');el('live').textContent=msg;setTimeout(()=>t.classList.remove('show'),1600)}
+const uid = (p='DT')=> p+Math.random().toString(36).slice(2,8).toUpperCase();
+const nowISO = ()=> new Date().toISOString();
+
+function read(key){ try{return JSON.parse(localStorage.getItem(key))||[]}catch{return[]} }
+function write(key, val){ localStorage.setItem(key, JSON.stringify(val)) }
+
+let orders = read(ORDERS_KEY);
+let products = read(PRODUCTS_KEY);
+
+// ---------- tab switching ----------
+const tabOrders = el('tabOrders');
+const tabProducts = el('tabProducts');
+const panelOrders = el('panelOrders');
+const panelProducts = el('panelProducts');
+
+function showTab(which){
+  const isOrders = which==='orders';
+  tabOrders.setAttribute('aria-selected', isOrders);
+  tabProducts.setAttribute('aria-selected', !isOrders);
+  panelOrders.hidden = !isOrders;
+  panelProducts.hidden = isOrders;
+}
+
+tabOrders.addEventListener('click', ()=>showTab('orders'));
+
+tabProducts.addEventListener('click', ()=>showTab('products'));
+
+// ---------- ORDERS (same behavior as previous version) ----------
+const ordersTbody = el('ordersTbody');
+const orderSummary = el('orderSummary');
+
+function orderStatusChip(s){
+  const cls = {pending:'chip',paid:'chip',shipped:'chip',cancelled:'chip'}[s]||'chip';
+  const tone = {pending:'#2c2630',paid:'#1f2b21',shipped:'#1d2430',cancelled:'#311e22'}[s]||'#212329';
+  return `<span class="${cls}" style="background:${tone}">${s}</span>`;
+}
+function money(n){ return (Number(n)||0).toLocaleString(undefined,{style:'currency',currency:'USD'}) }
+function parseItems(text){ try{const j=JSON.parse(text); if(Array.isArray(j)) return j;}catch{} return text.split('\n').map(s=>s.trim()).filter(Boolean) }
+
+function renderOrders(){
+  const q = el('orderSearch').value.trim().toLowerCase();
+  const f = el('orderFilter').value;
+  const s = el('orderSort').value;
+  let list = [...orders];
+  if(q){ list=list.filter(o => (o.id+o.name+o.email+o.status+(o.items||[]).join(' ')).toLowerCase().includes(q)) }
+  if(f!=='all'){ list=list.filter(o=>o.status===f) }
+  list.sort((a,b)=>{
+    switch(s){
+      case 'date_asc': return (a.date||'').localeCompare(b.date||'');
+      case 'date_desc': return (b.date||'').localeCompare(a.date||'');
+      case 'total_asc': return (a.total||0)-(b.total||0);
+      case 'total_desc': return (b.total||0)-(a.total||0);
+      case 'name_asc': return (a.name||'').localeCompare(b.name||'');
+      default:return 0;
+    }
+  })
+  ordersTbody.innerHTML = list.map(o=>`
+    <tr>
+      <td>${o.id}</td>
+      <td>${o.name||''}</td>
+      <td>${o.email||''}</td>
+      <td class="small">${o.items?.length?o.items.join(', '):''}</td>
+      <td>${money(o.total)}</td>
+      <td>${orderStatusChip(o.status)}</td>
+      <td>${o.date||''}</td>
+      <td>
+        <button class="btn btn--ghost" data-edit-order="${o.id}">Edit</button>
+        <button class="btn btn--danger" data-del-order="${o.id}">Delete</button>
+      </td>
+    </tr>`).join('');
+  const gross = list.reduce((s,o)=> s + (Number(o.total)||0), 0);
+  orderSummary.textContent = `${list.length} order(s) • Gross ${money(gross)}`;
+}
+
+function loadOrderToForm(o={}){
+  el('orderId').value = o.id||'';
+  el('customerName').value = o.name||'';
+  el('email').value = o.email||'';
+  el('total').value = o.total??'';
+  el('items').value = (o.items||[]).join('\n');
+  el('status').value = o.status||'pending';
+  el('date').value = o.date || new Date().toISOString().slice(0,10);
+}
+
+function formToOrder(){
+  return { id: el('orderId').value||uid('OR'), name: el('customerName').value.trim(), email: el('email').value.trim(), total: Number(el('total').value||0), items: parseItems(el('items').value), status: el('status').value, date: el('date').value||new Date().toISOString().slice(0,10) };
+}
+
+el('orderForm').addEventListener('submit',e=>{e.preventDefault();const o=formToOrder();const i=orders.findIndex(x=>x.id===o.id); if(i>=0){orders[i]=o;toast('Order updated')} else {orders.unshift(o);toast('Order added')} write(ORDERS_KEY,orders); renderOrders(); loadOrderToForm({});});
+
+document.addEventListener('click',e=>{
+  const ed = e.target.getAttribute('data-edit-order');
+  const del = e.target.getAttribute('data-del-order');
+  if(ed){ const o=orders.find(x=>x.id===ed); if(o) loadOrderToForm(o) }
+  if(del){ if(confirm('Delete this order?')){ orders=orders.filter(x=>x.id!==del); write(ORDERS_KEY,orders); renderOrders(); toast('Order deleted') } }
+});
+
+['orderSearch','orderFilter','orderSort'].forEach(id=> el(id).addEventListener('input', renderOrders));
+
+el('resetOrderBtn').addEventListener('click', ()=>loadOrderToForm({}));
+el('deleteOrderBtn').addEventListener('click', ()=>{ const id=el('orderId').value; if(!id) return toast('No order selected'); if(confirm('Delete this order?')){ orders=orders.filter(x=>x.id!==id); write(ORDERS_KEY,orders); renderOrders(); loadOrderToForm({}); toast('Order deleted') } });
+
+el('seedOrdersBtn').addEventListener('click', ()=>{ if(!confirm('Replace current orders with demo data?')) return; orders=[{id:uid('OR'),name:'John Carter',email:'john@example.com',total:20,items:['Essentials Tee x1'],status:'paid',date:'2025-08-05'},{id:uid('OR'),name:'Maya Ross',email:'maya@hey.com',total:68,items:['Classic Cap x2','Hoodie x1'],status:'pending',date:'2025-08-06'},{id:uid('OR'),name:'Luis Alvarez',email:'luis@work.com',total:34,items:['Essentials Tee x1'],status:'shipped',date:'2025-08-07'}]; write(ORDERS_KEY,orders); renderOrders(); toast('Demo orders loaded') });
+
+el('exportOrdersBtn').addEventListener('click', ()=>{ const blob=new Blob([JSON.stringify(orders,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='orders.json'; a.click(); URL.revokeObjectURL(a.href) });
+
+el('importOrdersFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(!Array.isArray(data)) throw new Error('JSON must be an array'); orders=data; write(ORDERS_KEY,orders); renderOrders(); toast('Orders imported') }catch(err){ alert('Import failed: '+err.message) } }; r.readAsText(f) });
+
+// Shortcuts for orders panel
+function panelActive(id){ return !el(id).hidden }
+document.addEventListener('keydown',e=>{
+  if(panelActive('panelOrders')){
+    if(e.key==='/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){ e.preventDefault(); el('orderSearch').focus() }
+    if(e.key.toLowerCase()==='n' && !e.metaKey && !e.ctrlKey){ e.preventDefault(); loadOrderToForm({}); toast('New order') }
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); el('orderForm').requestSubmit() }
+  }
+});
+
+renderOrders(); loadOrderToForm({}); if(!el('date').value) el('date').value = new Date().toISOString().slice(0,10);
+
+// ---------- PRODUCTS ----------
+const productsTbody = el('productsTbody');
+const prodSummary = el('prodSummary');
+const prodFilterCat = el('prodFilterCat');
+
+function statusBadge(active){ return `<span class="chip ${active?'chip--active':'chip--hidden'}">${active?'Active':'Hidden'}</span>` }
+
+function renderProductCats(){
+  const cats = Array.from(new Set(products.map(p=> (p.category||'').trim()).filter(Boolean))).sort();
+  prodFilterCat.innerHTML = ['<option value="all">All categories</option>', ...cats.map(c=>`<option>${c}</option>`)].join('');
+}
+
+function renderProducts(){
+  const q = el('prodSearch').value.trim().toLowerCase();
+  const act = el('prodFilterActive').value;
+  const cat = el('prodFilterCat').value;
+  const sort = el('prodSort').value;
+  let list = [...products];
+  if(q){ list=list.filter(p => (p.id+p.name+(p.category||'')+(p.description||'')).toLowerCase().includes(q)) }
+  if(act!=='all'){ const want = act==='active'; list=list.filter(p => !!p.active===want) }
+  if(cat!=='all'){ list=list.filter(p => (p.category||'')===cat) }
+  list.sort((a,b)=>{
+    switch(sort){
+      case 'date_asc': return (a.updatedAt||'').localeCompare(b.updatedAt||'');
+      case 'date_desc': return (b.updatedAt||'').localeCompare(a.updatedAt||'');
+      case 'price_asc': return (Number(a.price||0)) - (Number(b.price||0));
+      case 'price_desc': return (Number(b.price||0)) - (Number(a.price||0));
+      case 'name_asc': return (a.name||'').localeCompare(b.name||'');
+      default: return 0;
+    }
+  })
+  productsTbody.innerHTML = list.map(p=>{
+    const img = p.image || p.imageUrl || '';
+    return `<tr>
+      <td><div class="thumb">${img?`<img src="${img}">`:'—'}</div></td>
+      <td><div style="font-weight:800">${p.name||''}</div><div class="small">${(p.description||'').slice(0,80)}</div></td>
+      <td>${money(p.price)}</td>
+      <td>${p.stock??0}</td>
+      <td>${statusBadge(!!p.active)}</td>
+      <td>${p.category||''}</td>
+      <td class="small">${p.updatedAt? new Date(p.updatedAt).toLocaleString():''}</td>
+      <td>
+        <button class="btn btn--ghost" data-edit-prod="${p.id}">Edit</button>
+        <button class="btn btn--danger" data-del-prod="${p.id}">Delete</button>
+      </td>
+    </tr>`
+  }).join('');
+  prodSummary.textContent = `${list.length} product(s) • Active ${products.filter(p=>p.active).length} • Hidden ${products.filter(p=>!p.active).length}`;
+}
+
+function loadProdToForm(p={}){
+  el('prodId').value = p.id||'';
+  el('prodName').value = p.name||'';
+  el('prodPrice').value = p.price??'';
+  el('prodStock').value = p.stock??'';
+  el('prodCategory').value = p.category||'';
+  el('prodActive').checked = p.active!==false;
+  el('prodDesc').value = p.description||'';
+  el('prodImageUrl').value = p.imageUrl||'';
+  el('prodPreview').src = p.image || p.imageUrl || '';
+}
+
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file) })
+}
+
+el('prodImageFile').addEventListener('change', async (e)=>{
+  const f=e.target.files?.[0]; if(!f) return; const url=await fileToDataURL(f); el('prodPreview').src=url; })
+
+function formToProduct(){
+  const id = el('prodId').value || uid('PR');
+  return {
+    id,
+    name: el('prodName').value.trim(),
+    price: Number(el('prodPrice').value||0),
+    stock: Number(el('prodStock').value||0),
+    category: el('prodCategory').value.trim(),
+    active: el('prodActive').checked,
+    description: el('prodDesc').value.trim(),
+    imageUrl: el('prodImageUrl').value.trim(),
+    // if a file was picked, prefer the base64 preview
+    image: el('prodPreview').src && !el('prodPreview').src.startsWith('blob:') ? el('prodPreview').src : el('prodPreview').src,
+    updatedAt: nowISO()
+  }
+}
+
+el('productForm').addEventListener('submit',e=>{ e.preventDefault(); const p=formToProduct(); const i=products.findIndex(x=>x.id===p.id); if(i>=0){ products[i]=p; toast('Product updated') } else { products.unshift(p); toast('Product added') } write(PRODUCTS_KEY,products); renderProducts(); renderProductCats(); loadProdToForm({}) });
+
+// Edit/Delete buttons (event delegation)
+document.addEventListener('click', async (e)=>{
+  const ed = e.target.getAttribute('data-edit-prod');
+  const del = e.target.getAttribute('data-del-prod');
+  if(ed){ const p=products.find(x=>x.id===ed); if(p){ loadProdToForm(p); showTab('products') } }
+  if(del){ if(confirm('Delete this product?')){ products=products.filter(x=>x.id!==del); write(PRODUCTS_KEY,products); renderProducts(); renderProductCats(); toast('Product deleted') } }
+});
+
+['prodSearch','prodFilterActive','prodFilterCat','prodSort'].forEach(id=> el(id).addEventListener('input', renderProducts));
+
+el('resetProdBtn').addEventListener('click', ()=>loadProdToForm({}));
+el('deleteProdBtn').addEventListener('click', ()=>{ const id=el('prodId').value; if(!id) return toast('No product selected'); if(confirm('Delete this product?')){ products=products.filter(x=>x.id!==id); write(PRODUCTS_KEY,products); renderProducts(); renderProductCats(); loadProdToForm({}); toast('Product deleted') } });
+
+el('seedProductsBtn').addEventListener('click', ()=>{ if(!confirm('Replace current products with demo items?')) return; products=[
+  {id:uid('PR'), name:'DT Essentials Tee', price:34, stock:50, active:true, category:'Tees', description:'Soft cotton tee with DT logo.', imageUrl:'assets/tee.png', updatedAt:nowISO()},
+  {id:uid('PR'), name:'Classic Cap', price:28, stock:30, active:true, category:'Caps', description:'Adjustable cap. Low profile.', imageUrl:'assets/cap.png', updatedAt:nowISO()},
+  {id:uid('PR'), name:'Hoodie', price:64, stock:12, active:false, category:'Hoodies', description:'Heavyweight fleece hoodie.', imageUrl:'assets/hoodie.png', updatedAt:nowISO()},
+]; write(PRODUCTS_KEY,products); renderProducts(); renderProductCats(); toast('Demo products loaded') });
+
+el('exportProductsBtn').addEventListener('click', ()=>{ const blob=new Blob([JSON.stringify(products,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='products.json'; a.click(); URL.revokeObjectURL(a.href) });
+
+el('importProductsFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(!Array.isArray(data)) throw new Error('JSON must be an array'); products=data; write(PRODUCTS_KEY,products); renderProducts(); renderProductCats(); toast('Products imported') }catch(err){ alert('Import failed: '+err.message) } }; r.readAsText(f) });
+
+// Shortcuts for products panel
+document.addEventListener('keydown',e=>{
+  if(panelActive('panelProducts')){
+    if(e.key==='/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){ e.preventDefault(); el('prodSearch').focus() }
+    if(e.key.toLowerCase()==='n' && !e.metaKey && !e.ctrlKey){ e.preventDefault(); loadProdToForm({}); toast('New product') }
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); el('productForm').requestSubmit() }
+  }
+});
+
+// initial render
+renderProducts(); renderProductCats(); loadProdToForm({});
+
+</script>
+</body>
+</html>
